@@ -7,20 +7,15 @@ import { getProductBySlug } from "@/lib/api";
 import ShopInfo from "@/components/shop/shop-info";
 import { Container } from "@/components/ui/container";
 
-type PageProps = {
-  params: {
-    slug: string;
-  };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
+export type ParamsType = { slug: string };
 
-export default async function ProductPage({ params }: PageProps) {
-  const product = await getProductBySlug(params.slug);
+export default async function ProductPage({ params }: { params: ParamsType }) {
+  const { slug } = params;
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     notFound();
   }
-
   return (
     <Container className="py-10">
       <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
