@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import { QuantitySelector } from "./quantity-selector";
-
+import Image from "next/image";
 interface Option {
   name: string;
   stock: number;
@@ -107,11 +107,11 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                   }`}
                 >
                   {variant.image && (
-                    <img
+                    <Image
                       src={variant.image}
                       alt={variant.name}
                       className="h-12 w-12 object-cover"
-                    />
+                    ></Image>
                   )}
                   <span className="mt-1 block text-xs">{variant.name}</span>
                 </button>

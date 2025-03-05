@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -82,7 +81,7 @@ export default function VerifyPage() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-sm text-center text-gray-500">
-            Didn't receive the code?{" "}
+            <span> Didn&apos;t receive the code? </span>
             <Link
               href="/auth/register"
               className="text-blue-600 hover:text-blue-800"
