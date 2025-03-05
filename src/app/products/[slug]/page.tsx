@@ -7,11 +7,12 @@ import { getProductBySlug } from "@/lib/api";
 import ShopInfo from "@/components/shop/shop-info";
 import { Container } from "@/components/ui/container";
 
-interface PageProps {
+type PageProps = {
   params: {
     slug: string;
   };
-}
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
 export default async function ProductPage({ params }: PageProps) {
   const product = await getProductBySlug(params.slug);
@@ -34,7 +35,7 @@ export default async function ProductPage({ params }: PageProps) {
       <ShopInfo />
 
       <Separator className="my-10" />
-    
+
       <div className="space-y-6">
         <h3 className="text-lg font-medium">Product Description</h3>
         <div className="prose max-w-none">{product.description}</div>
