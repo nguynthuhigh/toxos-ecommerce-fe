@@ -43,9 +43,10 @@ interface Product {
   updatedAt: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+// const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
+  console.log(slug);
   // try {
   //   const response = await fetch(`${API_URL}/products/${slug}`);
 
@@ -70,11 +71,8 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     price: 100,
     stock: 50,
     description: "Best running shoes",
-    thumbnail: "/products/nike-air-max.jpg",
-    images: [
-      "https://down-vn.img.susercontent.com/file/vn-11134201-7ra0g-m68e8sb9khq0bd@resize_w900_nl.webp",
-      "https://down-vn.img.susercontent.com/file/vn-11134201-7ra0g-m68e8sb9khq0bd@resize_w900_nl.webp",
-    ],
+    thumbnail: "/products/ex_prod.png",
+    images: ["/products/ex_prod.png", "/products/ex_prod.png"],
     soldCount: 0,
     brand: "Nike",
     origin: "VietNam",
@@ -85,15 +83,15 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     attributes: { style: "boxy" },
     variants: [
       {
-        name: "Size",
-        image: "variant-image.jpg",
+        name: "Màu đen",
+        image: "/products/ex_prod.png",
         price: 110,
         stock: 20,
         hasOption: true,
         options: [
           {
             name: "Size 40",
-            stock: 10,
+            stock: 20,
             sku: "SKU40",
             price: 100,
             _id: "67c6a2192b206e19a4b0b506",

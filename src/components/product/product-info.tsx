@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
+import { QuantitySelector } from "./quantity-selector";
 
 interface Option {
   name: string;
@@ -164,13 +165,11 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           <span className="font-medium">{currentStock}</span>
         </div>
       </div>
-
-      {/* Add to Cart Button */}
+      <QuantitySelector onQuantityChange={() => {}} />
       <Button className="w-full" size="lg">
         Add to Cart
       </Button>
 
-      {/* Product Attributes */}
       {relevantAttributes.length > 0 && (
         <div className="rounded-lg border bg-gray-50 p-4 space-y-4">
           <h3 className="font-medium">Product Specifications</h3>

@@ -6,7 +6,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { StoreSection } from "@/components/cart/store-section";
 import { formatPrice } from "@/lib/utils";
 
-// Mock data for demonstration
 const cartData = {
   stores: [
     {
@@ -72,12 +71,10 @@ export default function CartPage() {
   };
 
   const handleUpdateQuantity = (itemId: string, quantity: number) => {
-    // TODO: Implement quantity update logic
     console.log("Update quantity", itemId, quantity);
   };
 
   const handleRemoveItem = (itemId: string) => {
-    // TODO: Implement remove item logic
     console.log("Remove item", itemId);
   };
 
@@ -107,7 +104,6 @@ export default function CartPage() {
       <div className="container mx-auto px-4">
         <h1 className="mb-6 text-2xl font-bold">Giỏ hàng</h1>
 
-        {/* Cart Header */}
         <div className="mb-4 rounded-lg border bg-white p-4">
           <div className="flex items-center space-x-8">
             <div className="flex items-center space-x-4">
@@ -138,7 +134,6 @@ export default function CartPage() {
           </div>
         </div>
 
-        {/* Store Sections */}
         <div className="space-y-4">
           {cartData.stores.map((store) => (
             <StoreSection

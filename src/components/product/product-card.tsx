@@ -20,7 +20,7 @@ export function ProductCard({
   soldCount,
 }: ProductCardProps) {
   return (
-    <Link href={`/product/${id}`}>
+    <Link href={`/products/${id}`}>
       <div className="group relative h-full overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:shadow-lg">
         {/* Image container with aspect ratio */}
         <div className="relative aspect-square overflow-hidden">

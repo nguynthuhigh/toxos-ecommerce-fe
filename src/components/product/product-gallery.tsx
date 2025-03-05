@@ -20,24 +20,24 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
           aria-orientation="horizontal"
           role="tablist"
         >
-          {images.map((image, i) => (
+          {images.map((image, index) => (
             <button
-              key={image}
-              onClick={() => setSelectedImage(i)}
+              key={`gallery-image-${index}`}
+              onClick={() => setSelectedImage(index)}
               className={cn(
                 "relative flex h-24 cursor-pointer items-center justify-center rounded-md bg-white text-sm font-medium uppercase hover:bg-gray-50",
-                selectedImage === i
+                selectedImage === index
                   ? "ring-2 ring-orange-500"
                   : "ring-1 ring-gray-200"
               )}
               role="tab"
-              aria-selected={selectedImage === i}
-              aria-controls={`product-image-${i}`}
+              aria-selected={selectedImage === index}
+              aria-controls={`product-image-${index}`}
             >
               <span className="absolute inset-0 overflow-hidden rounded-md">
                 <Image
                   src={image}
-                  alt=""
+                  alt={`Product image ${index + 1}`}
                   className="h-full w-full object-cover object-center"
                   width={200}
                   height={200}
@@ -57,7 +57,7 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
         >
           <Image
             src={images[selectedImage]}
-            alt=""
+            alt={`Product image ${selectedImage + 1}`}
             className="h-full w-full object-cover object-center sm:rounded-lg"
             width={600}
             height={600}
