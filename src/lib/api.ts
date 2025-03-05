@@ -20,7 +20,7 @@ interface Variant {
   updatedAt: string;
 }
 
-interface Product {
+export interface Product {
   _id: string;
   title: string;
   slug: string;
