@@ -111,7 +111,9 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                       src={variant.image}
                       alt={variant.name}
                       className="h-12 w-12 object-cover"
-                    ></Image>
+                      width={48}
+                      height={48}
+                    />
                   )}
                   <span className="mt-1 block text-xs">{variant.name}</span>
                 </button>
@@ -122,7 +124,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           {/* Variant Options */}
           {currentVariant?.hasOption && (
             <div className="space-y-2">
-              <h3 className="text-sm font-medium">Size</h3>
+              <h3 className="text-sm font-medium">Kích thước</h3>
               <div className="grid grid-cols-4 gap-2">
                 {currentVariant.options.map((option) => (
                   <button
@@ -149,30 +151,30 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       {/* Additional Info */}
       <div className="space-y-4">
         <div className="flex items-center justify-between text-sm">
-          <span>Brand:</span>
+          <span>Thương hiệu:</span>
           <span className="font-medium">{product.brand}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
-          <span>Origin:</span>
+          <span>Xuất xứ:</span>
           <span className="font-medium">{product.origin}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
-          <span>Sold:</span>
+          <span>Đã bán:</span>
           <span className="font-medium">{product.soldCount}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
-          <span>Stock:</span>
+          <span>Tồn kho:</span>
           <span className="font-medium">{currentStock}</span>
         </div>
       </div>
       <QuantitySelector onQuantityChange={() => {}} />
       <Button className="w-full" size="lg">
-        Add to Cart
+        Thêm vào giỏ hàng
       </Button>
 
       {relevantAttributes.length > 0 && (
         <div className="rounded-lg border bg-gray-50 p-4 space-y-4">
-          <h3 className="font-medium">Product Specifications</h3>
+          <h3 className="font-medium">Thông số kỹ thuật</h3>
           {relevantAttributes.map(
             (attr) =>
               product.attributes[attr] && (

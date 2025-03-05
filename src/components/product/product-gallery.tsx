@@ -13,7 +13,6 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
 
   return (
     <div className="flex flex-col-reverse">
-      {/* Image Grid */}
       <div className="mx-auto mt-6 w-full max-w-2xl sm:block lg:max-w-none">
         <div
           className="grid grid-cols-4 gap-6"
@@ -27,7 +26,7 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
               className={cn(
                 "relative flex h-24 cursor-pointer items-center justify-center rounded-md bg-white text-sm font-medium uppercase hover:bg-gray-50",
                 selectedImage === index
-                  ? "ring-2 ring-orange-500"
+                  ? "ring-2 ring-blue-500"
                   : "ring-1 ring-gray-200"
               )}
               role="tab"

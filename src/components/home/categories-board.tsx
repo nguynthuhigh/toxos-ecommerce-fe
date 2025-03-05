@@ -30,8 +30,8 @@ const categories = [
 
 export function CategoriesBoard() {
   return (
-    <Container className="w-full bg-white border-b ">
-      <div className="w-full bg-white border-b">
+    <Container className="w-full bg-white  ">
+      <div className="w-full bg-white ">
         <div className="max-w-[1200px] mx-auto">
           <div className="grid grid-cols-6 sm:grid-cols-12 gap-2 p-4">
             {categories.map((category) => (

@@ -18,38 +18,44 @@ export default function ProductPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const data = getProductBySlug(slug as string);
-    if (!data) {
-      notFound();
-    }
-    setProduct(productData);
-    setIsLoading(false);
+    const fetchData = async () => {
+      const data = await getProductBySlug(slug as string);
+      if (!data) {
+        notFound();
+      }
+      setProduct(data);
+      setIsLoading(false);
+    };
+    fetchData();
   }, [slug]);
-  if (isLoading) return <div>Loading...</div>;
+
+  if (isLoading || !productData) return <div>Loading...</div>;
+
   return (
     <Container className="py-10">
-      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
-        <ProductGallery
-          images={[
-            productData?.thumbnail as string,
-            ...(productData?.images ?? []),
-          ]}
-        />
-        <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
-          <ProductInfo product={productData!} />
-        </div>
-      </div>
+      {!isLoading && productData && (
+        <>
+          <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
+            <ProductGallery
+              images={[productData.thumbnail, ...(productData.images || [])]}
+            />
+            <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
+              <ProductInfo product={productData} />
+            </div>
+          </div>
 
-      <Separator className="my-10" />
+          <Separator className="my-10" />
 
-      <ShopInfo />
+          <ShopInfo />
 
-      <Separator className="my-10" />
+          <Separator className="my-10" />
 
-      <div className="space-y-6">
-        <h3 className="text-lg font-medium">Product Description</h3>
-        <div className="prose max-w-none">{productData?.description}</div>
-      </div>
+          <div className="space-y-6">
+            <h3 className="text-lg font-medium">Product Description</h3>
+            <div className="prose max-w-none">{productData?.description}</div>
+          </div>
+        </>
+      )}
     </Container>
   );
 }
