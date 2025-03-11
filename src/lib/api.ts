@@ -35,6 +35,9 @@ export interface Product {
   origin: string;
   hasVariant: boolean;
   shopId: string;
+  rating: number;
+  ratingCount: number;
+  originalPrice: number;
   category: { name: string };
   subcategory: { name: string };
   attributes: Record<string, string>;
@@ -91,6 +94,9 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     category: { name: "mens-fashion" },
     subcategory: { name: "pants" },
     attributes: { style: "boxy" },
+    rating: 4.5,
+    ratingCount: 100,
+    originalPrice: 110,
     variants: [
       {
         name: "Màu đen",
