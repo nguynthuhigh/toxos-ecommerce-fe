@@ -4,7 +4,11 @@ const nextConfig = {
     turbo: false,
   },
   images: {
-    domains: ["down-vn.img.susercontent.com", "curxor-tracking.netlify.app"],
+    domains: [
+      "down-vn.img.susercontent.com",
+      "curxor-tracking.netlify.app",
+      "res.cloudinary.com",
+    ],
   },
 };
 

@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+import { RootLayoutContent } from "@/components/layout/root-layout";
+import { Providers } from "@/components/providers";
+import { Toaster } from "sonner";
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Toxos E-commerce",
-  description: "Your one-stop shop for everything",
+  title: "Toxos - Ecommerce Platform",
+  description: "Buy and sell products online",
 };
 
 export default function RootLayout({
@@ -21,14 +18,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${inter.className} antialiased`}
-        suppressHydrationWarning
-      >
-        <Header />
-        {children}
-        <Footer />
+    <html lang="en">
+      <body className={inter.className}>
+        <Providers>
+          <RootLayoutContent>{children}</RootLayoutContent>
+        </Providers>
+        <Toaster />
       </body>
     </html>
   );

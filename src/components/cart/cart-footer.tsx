@@ -1,34 +1,38 @@
-import { Checkbox } from "@radix-ui/react-checkbox";
-import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { CartData } from "@/app/cart/page";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CartShop } from "@/lib/services/cart";
+
 interface CartFooterProps {
-  cartData: CartData[];
+  cartData: CartShop[];
   selectedItems: Set<string>;
   setSelectedItems: (items: Set<string>) => void;
   isAllSelected: boolean;
   totalItems: number;
+  getProductKey: (productId: string, variantId?: string) => string;
 }
+
 export default function CartFooter({
   cartData,
   selectedItems,
   setSelectedItems,
   isAllSelected,
   totalItems,
+  getProductKey,
 }: CartFooterProps) {
-  const totalPrice = cartData.reduce((sum, store) => {
+  const totalPrice = cartData.reduce((total, shop) => {
     return (
-      sum +
-      store.items.reduce((storeSum, item) => {
-        if (selectedItems.has(item.id)) {
-          return storeSum + item.price * item.quantity;
+      total +
+      shop.products.reduce((shopTotal, product) => {
+        if (selectedItems.has(getProductKey(product._id, product.variantId))) {
+          return shopTotal + product.price * product.quantity;
         }
-        return storeSum;
+        return shopTotal;
       }, 0)
     );
   }, 0);
+
   return (
-    <div className="mt-4 rounded-lg border bg-white p-4 fixed bottom-0 left-0 right-0">
+    <div className="sticky bottom-0 mt-4 rounded-lg border bg-white p-4 shadow-lg">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Checkbox
@@ -36,9 +40,11 @@ export default function CartFooter({
             onCheckedChange={(checked) => {
               const newSelectedItems = new Set<string>();
               if (checked) {
-                cartData.forEach((store) => {
-                  store.items.forEach((item) => {
-                    newSelectedItems.add(item.id);
+                cartData.forEach((shop) => {
+                  shop.products.forEach((product) => {
+                    newSelectedItems.add(
+                      getProductKey(product._id, product.variantId)
+                    );
                   });
                 });
               }
@@ -46,25 +52,20 @@ export default function CartFooter({
             }}
             className="h-5 w-5"
           />
-          <span>Chọn tất cả ({totalItems})</span>
-          <Button variant="ghost" className="text-red-500 hover:text-red-600">
-            Xóa
-          </Button>
-          <div className="flex-1" />
+          <span className="font-medium">Tất cả ({totalItems} sản phẩm)</span>
         </div>
         <div className="flex items-center space-x-8">
-          <div className="text-right">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm">Tổng thanh toán:</span>
-              <span className="text-xl font-medium text-red-500">
-                ₫{formatPrice(totalPrice)}
-              </span>
-            </div>
-            <div className="text-sm text-gray-500">
-              Tiết kiệm: ₫{formatPrice(totalPrice * 0.1)}
-            </div>
+          <div className="text-sm">
+            <span className="text-gray-500">Tổng thanh toán:</span>
+            <span className="ml-2 text-xl font-medium text-blue-500">
+              ₫{totalPrice.toLocaleString()}
+            </span>
           </div>
-          <Button className="h-12 w-48 bg-red-500 hover:bg-red-600">
+          <Button
+            size="lg"
+            onClick={() => {}}
+            disabled={selectedItems.size === 0}
+          >
             Mua hàng ({selectedItems.size})
           </Button>
         </div>

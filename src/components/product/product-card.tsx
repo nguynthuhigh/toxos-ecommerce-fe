@@ -2,59 +2,68 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Star } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { Product } from "@/lib/services/product";
 import { formatPrice } from "@/lib/utils";
 
 interface ProductCardProps {
-  id: string;
-  title: string;
-  price: number;
-  image: string;
-  soldCount: number;
+  product: Product;
 }
 
-export function ProductCard({
-  id,
-  title,
-  price,
-  image,
-  soldCount,
-}: ProductCardProps) {
+export function ProductCard({ product }: ProductCardProps) {
+  const discountedPrice = product.price * (1 - product.discount / 100);
+
   return (
-    <Link href={`/products/${id}`}>
-      <div className="group relative h-full overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:shadow-lg">
-        {/* Image container with aspect ratio */}
-        <div className="relative aspect-square overflow-hidden">
+    <Card className="group overflow-hidden transition-all hover:border-blue-600">
+      <Link href={`/product/${product.slug}`}>
+        <div className="aspect-square overflow-hidden bg-gray-100">
           <Image
-            src={image}
-            alt={title}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            src={product.thumbnail}
+            alt={product.title}
+            width={300}
+            height={300}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx4eHRoaHSQtJSEkLzYvLy0vLi44QjhAOEA4Qi4tMkYyLlFUUVRAR0BXUFNMUE1HUVf/2wBDARUXFyAeIB4aGh44ODhXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1f/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+            priority={false}
           />
-          {/* Discount tag can be added here */}
-          <div className="absolute left-0 top-0 bg-red-500 px-2 py-1 text-xs text-white">
-            -40%
-          </div>
         </div>
-
-        {/* Product info */}
-        <div className="p-3">
-          {/* Title */}
-          <h3 className="mb-2 line-clamp-2 min-h-[40px] text-sm text-gray-800">
-            {title}
+        <div className="p-4">
+          <h3 className="text-sm font-medium line-clamp-2 group-hover:text-blue-600">
+            {product.title}
           </h3>
-
-          {/* Price */}
-          <div className="mb-2 flex items-baseline gap-2">
-            <span className="text-lg font-bold text-red-500">
-              ₫{formatPrice(price)}
+          <div className="mt-2">
+            <span className="text-lg font-bold text-blue-600">
+              {formatPrice(discountedPrice)}
             </span>
+            {product.discount > 0 && (
+              <>
+                <span className="ml-2 text-sm text-gray-500 line-through">
+                  {formatPrice(product.price)}
+                </span>
+                <span className="ml-2 text-sm text-red-500">
+                  -{product.discount}%
+                </span>
+              </>
+            )}
           </div>
-
-          {/* Sold count */}
-          <div className="text-xs text-gray-500">Đã bán {soldCount}</div>
+          <div className="mt-2 flex items-center justify-between text-sm text-gray-500">
+            {product.soldCount > 0 && <span>Đã bán {product.soldCount}</span>}
+            <div className="flex items-center gap-1">
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <span>4.8</span>
+            </div>
+          </div>
         </div>
-      </div>
-    </Link>
+        {product.stock === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <span className="text-lg font-bold text-white">Hết hàng</span>
+          </div>
+        )}
+      </Link>
+    </Card>
   );
 }

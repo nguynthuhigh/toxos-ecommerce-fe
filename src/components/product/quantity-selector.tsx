@@ -4,20 +4,24 @@ import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
 
 interface QuantitySelectorProps {
-  onQuantityChange: (quantity: number) => void;
+  max: number;
+  onQuantityChange?: (quantity: number) => void;
   initialQuantity?: number;
 }
 
 export function QuantitySelector({
-  onQuantityChange,
+  max,
+  onQuantityChange = () => {},
   initialQuantity = 1,
 }: QuantitySelectorProps) {
-  const [quantity, setQuantity] = useState(initialQuantity);
+  const [quantity, setQuantity] = useState(Math.min(initialQuantity, max));
 
   const increaseQuantity = () => {
-    const newQuantity = quantity + 1;
-    setQuantity(newQuantity);
-    onQuantityChange(newQuantity);
+    if (quantity < max) {
+      const newQuantity = quantity + 1;
+      setQuantity(newQuantity);
+      onQuantityChange(newQuantity);
+    }
   };
 
   const decreaseQuantity = () => {
@@ -29,22 +33,22 @@ export function QuantitySelector({
   };
 
   return (
-    <div className="flex items-center justify-between">
-      <span className="text-sm font-medium text-gray-700">Quantity:</span>
-      <div className="flex items-center">
+    <div className="flex items-center">
+      <div className="flex items-center rounded-lg border border-gray-200 bg-white">
         <button
           onClick={decreaseQuantity}
-          className="flex h-10 w-10 items-center justify-center rounded-l-lg border border-r-0 border-gray-200 bg-gray-50 text-gray-600 transition-all hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-9 w-9 items-center justify-center border-r border-gray-200 text-gray-600 transition-all hover:bg-gray-50 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
           disabled={quantity <= 1}
         >
           <Minus className="h-4 w-4" />
         </button>
-        <div className="flex h-10 w-16 items-center justify-center border border-gray-200 bg-white text-center text-base font-medium">
+        <div className="flex h-9 w-14 items-center justify-center text-center text-sm font-medium text-gray-900">
           {quantity}
         </div>
         <button
           onClick={increaseQuantity}
-          className="flex h-10 w-10 items-center justify-center rounded-r-lg border border-l-0 border-gray-200 bg-gray-50 text-gray-600 transition-all hover:bg-gray-100 hover:text-gray-700"
+          className="flex h-9 w-9 items-center justify-center border-l border-gray-200 text-gray-600 transition-all hover:bg-gray-50 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={quantity >= max}
         >
           <Plus className="h-4 w-4" />
         </button>

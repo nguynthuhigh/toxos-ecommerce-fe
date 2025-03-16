@@ -1,96 +1,96 @@
 "use client";
 
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { verify } from "@/lib/services/auth";
+import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-
-const verifySchema = z.object({
-  code: z.string().length(6, "Verification code must be 6 digits"),
-});
-
-type VerifyFormValues = z.infer<typeof verifySchema>;
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function VerifyPage() {
-  const form = useForm<VerifyFormValues>({
-    resolver: zodResolver(verifySchema),
-    defaultValues: {
-      code: "",
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
+  const [otp, setOtp] = useState("");
+
+  const { mutate, isLoading, error } = useMutation({
+    mutationFn: verify,
+    onSuccess: () => {
+      // Redirect to login page after successful verification
+      router.push("/auth/login");
     },
   });
 
-  const onSubmit = async (data: VerifyFormValues) => {
-    // TODO: Implement verification logic
-    console.log(data);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    mutate({ email, otp });
   };
 
+  if (!email) {
+    return (
+      <Container className="max-w-md py-20">
+        <div className="text-center">
+          <p className="text-red-500">Email không hợp lệ</p>
+          <Button
+            className="mt-4"
+            variant="outline"
+            onClick={() => router.push("/auth/register")}
+          >
+            Quay lại đăng ký
+          </Button>
+        </div>
+      </Container>
+    );
+  }
+
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">
-            Verify your email
-          </CardTitle>
-          <CardDescription>
-            Enter the verification code sent to your email
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Verification Code</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter 6-digit code"
-                        {...field}
-                        maxLength={6}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full">
-                Verify Email
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <div className="text-sm text-center text-gray-500">
-            <span> Didn&apos;t receive the code? </span>
-            <Link
-              href="/auth/register"
-              className="text-blue-600 hover:text-blue-800"
-            >
-              Try again
-            </Link>
+    <Container className="max-w-md py-20">
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Xác thực tài khoản</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Nhập mã OTP đã được gửi đến email {email}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="otp">
+              Mã OTP
+            </label>
+            <Input
+              id="otp"
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Nhập mã OTP"
+              required
+            />
           </div>
-        </CardFooter>
-      </Card>
-    </main>
+
+          {error && (
+            <p className="text-sm text-red-500">
+              {error instanceof Error ? error.message : "Xác thực thất bại"}
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            className="w-full"
+            size="lg"
+            disabled={isLoading}
+          >
+            {isLoading ? "Đang xử lý..." : "Xác thực"}
+          </Button>
+        </form>
+
+        <p className="text-sm text-center text-gray-500">
+          Không nhận được mã?{" "}
+          <button className="text-blue-500 hover:underline">Gửi lại</button>
+        </p>
+      </div>
+    </Container>
   );
 }

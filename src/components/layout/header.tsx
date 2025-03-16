@@ -6,10 +6,20 @@ import Link from "next/link";
 import { ShoppingCart, Search, User } from "lucide-react";
 import Image from "next/image";
 import { Container } from "../ui/container";
+import { useAuthStore } from "@/store/use-auth-store";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useCartStore } from "@/lib/store/cart";
 
 export default function Header() {
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const totalItems = useCartStore((state) => state.totalItems);
   return (
-    <Container>
+    <Container className="fixed top-0 left-0 right-0 z-50 ">
       <header className="sticky top-0 z-50 w-full border-b bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
@@ -42,20 +52,49 @@ export default function Header() {
             </div>
 
             <div className="flex items-center space-x-6">
-              <Link
-                href="/auth/login"
-                className="flex items-center text-sm text-gray-700 hover:text-blue-500"
-              >
-                <User className="mr-1 h-5 w-5" />
-                <span>Login</span>
-              </Link>
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="flex items-center space-x-2"
+                    >
+                      <User className="h-5 w-5" />
+                      <span>{user?.email}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>
+                      <Link href="/profile" className="w-full">
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href="/orders" className="w-full">
+                        Orders
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => logout()}>
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="flex items-center text-sm text-gray-700 hover:text-blue-500"
+                >
+                  <User className="mr-1 h-5 w-5" />
+                  <span>Login</span>
+                </Link>
+              )}
               <Link
                 href="/cart"
                 className="relative flex items-center text-sm text-gray-700 hover:text-blue-500"
               >
                 <ShoppingCart className="h-6 w-6" />
                 <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
-                  0
+                  {totalItems}
                 </span>
               </Link>
             </div>
