@@ -79,7 +79,6 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = useState("popular");
 
   const filteredProducts = mockProducts.filter((product) => {
-    // Filter by color
     if (selectedColors.length > 0) {
       if (!product.colors.some((color) => selectedColors.includes(color))) {
         return false;

@@ -29,6 +29,12 @@ export interface UpdateQuantityData {
   shopId: string;
 }
 
+export interface RemoveItemData {
+  productId: string;
+  variantId: string;
+  shopId: string;
+}
+
 export interface CartItem {
   _id: string;
   title: string;
@@ -36,6 +42,7 @@ export interface CartItem {
   quantity: number;
   thumbnail: string;
   variantId?: string;
+  category?: string;
   variant?: {
     name: string;
     value: string;
@@ -55,7 +62,7 @@ export interface CartItem {
 }
 
 export interface CartShop {
-  _id: string;
+  id: string;
   name: string;
   slug: string;
   logo: string;
@@ -84,8 +91,8 @@ const cartApi = {
   updateQuantity: (data: UpdateQuantityData) =>
     axiosInstance.put<void>("/cart/update-quantity", data),
 
-  removeItem: (productId: string) =>
-    axiosInstance.delete<void>(`/cart/remove-item/${productId}`),
+  removeItem: (data: RemoveItemData) =>
+    axiosInstance.post<void>("/cart/remove-item", data),
 };
 
 export function useCart() {
@@ -120,41 +127,44 @@ export function useAddToCart() {
       if (previousCart) {
         queryClient.setQueryData<CartShop[]>(["cart"], (old) => {
           if (!old) return old;
-          const shopIndex = old.findIndex(
-            (shop) => shop._id === newItem.shopId
-          );
+          const shopIndex = old.findIndex((shop) => shop.id === newItem.shopId);
 
           if (shopIndex === -1) return old;
 
           const updatedCart = [...old];
           const shop = { ...updatedCart[shopIndex] };
 
-          // Check if product already exists in cart
-          const existingProductIndex = shop.products.findIndex(
+          const existingProduct = shop.products.find(
             (product) =>
               product._id === newItem.productId &&
               product.variantId === newItem.variantId
           );
 
-          if (existingProductIndex !== -1) {
-            // If product exists, increment quantity
-            shop.products = shop.products.map((product, index) => {
-              if (index === existingProductIndex) {
+          if (existingProduct) {
+            shop.products = shop.products.map((product) => {
+              if (
+                product._id === newItem.productId &&
+                product.variantId === newItem.variantId
+              ) {
                 return {
                   ...product,
-                  quantity: product.quantity + newItem.quantity,
+                  quantity: newItem.quantity,
                 };
               }
               return product;
             });
           } else {
-            // If product doesn't exist, add new product
             shop.products = [
               ...shop.products,
               {
                 _id: newItem.productId,
                 quantity: newItem.quantity,
                 variantId: newItem.variantId,
+                title: "",
+                price: 0,
+                thumbnail: "",
+                category: "",
+                variants: [],
               } as CartItem,
             ];
           }
@@ -165,6 +175,11 @@ export function useAddToCart() {
       }
 
       return { previousCart };
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      toast.success("Thêm vào giỏ hàng thành công");
     },
   });
 }
@@ -190,7 +205,7 @@ export function useUpdateVariant() {
         queryClient.setQueryData<CartShop[]>(["cart"], (old) => {
           if (!old) return old;
           const shopIndex = old.findIndex(
-            (shop) => shop._id === newVariant.shopId
+            (shop) => shop.id === newVariant.shopId
           );
 
           if (shopIndex === -1) return old;
@@ -203,10 +218,21 @@ export function useUpdateVariant() {
               product._id === newVariant.productId &&
               product.variantId === newVariant.oldVariantId
             ) {
+              const newVariantData = product.variants?.find(
+                (v) => v._id === newVariant.newVariantId
+              );
               return {
                 ...product,
                 variantId: newVariant.newVariantId,
                 quantity: parseInt(newVariant.quantity),
+                price: newVariantData?.price || product.price,
+                variant: newVariantData
+                  ? {
+                      name: newVariantData.name,
+                      value: newVariantData.value,
+                      price: newVariantData.price,
+                    }
+                  : undefined,
               };
             }
             return product;
@@ -253,7 +279,7 @@ export function useUpdateQuantity() {
         queryClient.setQueryData<CartShop[]>(["cart"], (old) => {
           if (!old) return old;
           const shopIndex = old.findIndex(
-            (shop) => shop._id === newQuantity.shopId
+            (shop) => shop.id === newQuantity.shopId
           );
 
           if (shopIndex === -1) return old;
@@ -294,32 +320,45 @@ export function useUpdateQuantity() {
 export function useRemoveItem() {
   const queryClient = useQueryClient();
 
-  return useMutation<void, AxiosError<ApiError>, string, MutationContext>({
-    mutationFn: async (productId) => {
-      const response = await cartApi.removeItem(productId);
+  return useMutation<
+    void,
+    AxiosError<ApiError>,
+    RemoveItemData,
+    MutationContext
+  >({
+    mutationFn: async (data) => {
+      const response = await cartApi.removeItem(data);
       return response.data;
     },
-    onMutate: async (productId) => {
+    onMutate: async (removedItem) => {
       await queryClient.cancelQueries({ queryKey: ["cart"] });
       const previousCart = queryClient.getQueryData<CartShop[]>(["cart"]);
 
       if (previousCart) {
         queryClient.setQueryData<CartShop[]>(["cart"], (old) => {
           if (!old) return old;
-          return old
-            .map((shop) => ({
-              ...shop,
-              products: shop.products.filter(
-                (product) => product._id !== productId
-              ),
-            }))
+          const updatedCart = old
+            .map((shop) => {
+              if (shop.id === removedItem.shopId) {
+                return {
+                  ...shop,
+                  products: shop.products.filter(
+                    (product) =>
+                      product._id !== removedItem.productId ||
+                      product.variantId !== removedItem.variantId
+                  ),
+                };
+              }
+              return shop;
+            })
             .filter((shop) => shop.products.length > 0);
+          return updatedCart;
         });
       }
 
       return { previousCart };
     },
-    onError: (err, productId, context) => {
+    onError: (err, variables, context) => {
       if (context?.previousCart) {
         queryClient.setQueryData(["cart"], context.previousCart);
       }

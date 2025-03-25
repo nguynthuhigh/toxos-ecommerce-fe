@@ -29,7 +29,21 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, MapPin, Pencil, Trash2 } from "lucide-react";
+import { Plus, MapPin, Pencil, Trash2, Search } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  provinces,
+  type Province,
+  type District,
+  type Ward,
+  searchProvinces,
+} from "@/lib/constants/location";
 
 const addressFormSchema = z.object({
   fullName: z
@@ -48,8 +62,18 @@ const addressFormSchema = z.object({
 
 type AddressFormValues = z.infer<typeof addressFormSchema>;
 
-// Mock data for demonstration
-const mockAddresses = [
+interface Address {
+  id: number;
+  fullName: string;
+  phone: string;
+  province: string;
+  district: string;
+  ward: string;
+  street: string;
+  isDefault: boolean;
+}
+
+const mockAddresses: Address[] = [
   {
     id: 1,
     fullName: "Nguyễn Văn A",
@@ -73,9 +97,18 @@ const mockAddresses = [
 ];
 
 export default function AddressesPage() {
-  const [addresses, setAddresses] = useState(mockAddresses);
+  const [addresses, setAddresses] = useState<Address[]>(mockAddresses);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingAddress, setEditingAddress] = useState<any>(null);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [selectedProvince, setSelectedProvince] = useState<Province | null>(
+    null
+  );
+  const [selectedDistrict, setSelectedDistrict] = useState<District | null>(
+    null
+  );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredProvinces, setFilteredProvinces] =
+    useState<Province[]>(provinces);
 
   const form = useForm<AddressFormValues>({
     resolver: zodResolver(addressFormSchema),
@@ -103,11 +136,23 @@ export default function AddressesPage() {
     setIsDialogOpen(false);
     form.reset();
     setEditingAddress(null);
+    setSelectedProvince(null);
+    setSelectedDistrict(null);
   }
 
-  function handleEdit(address: any) {
+  function handleEdit(address: Address) {
     setEditingAddress(address);
     form.reset(address);
+    const province = provinces.find((p) => p.name === address.province);
+    if (province) {
+      setSelectedProvince(province);
+      const district = province.districts.find(
+        (d) => d.name === address.district
+      );
+      if (district) {
+        setSelectedDistrict(district);
+      }
+    }
     setIsDialogOpen(true);
   }
 
@@ -122,6 +167,28 @@ export default function AddressesPage() {
         isDefault: addr.id === id,
       }))
     );
+  }
+
+  function handleProvinceChange(provinceId: string) {
+    const province = provinces.find((p) => p.id === provinceId);
+    setSelectedProvince(province || null);
+    setSelectedDistrict(null);
+    form.setValue("district", "");
+    form.setValue("ward", "");
+  }
+
+  function handleDistrictChange(districtId: string) {
+    if (!selectedProvince) return;
+    const district = selectedProvince.districts.find(
+      (d) => d.id === districtId
+    );
+    setSelectedDistrict(district || null);
+    form.setValue("ward", "");
+  }
+
+  function handleSearch(query: string) {
+    setSearchQuery(query);
+    setFilteredProvinces(searchProvinces(query));
   }
 
   return (
@@ -141,6 +208,8 @@ export default function AddressesPage() {
                   onClick={() => {
                     form.reset();
                     setEditingAddress(null);
+                    setSelectedProvince(null);
+                    setSelectedDistrict(null);
                   }}
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -186,54 +255,113 @@ export default function AddressesPage() {
                       )}
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="province"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Tỉnh/Thành phố</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Chọn tỉnh/thành phố"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="district"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Quận/Huyện</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Chọn quận/huyện" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                      <Input
+                        placeholder="Tìm kiếm tỉnh/thành phố, quận/huyện, phường/xã..."
+                        value={searchQuery}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="pl-9"
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="ward"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phường/Xã</FormLabel>
+                    <FormField
+                      control={form.control}
+                      name="province"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tỉnh/Thành phố</FormLabel>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              handleProvinceChange(value);
+                            }}
+                            value={field.value}
+                          >
                             <FormControl>
-                              <Input placeholder="Chọn phường/xã" {...field} />
+                              <SelectTrigger>
+                                <SelectValue placeholder="Chọn tỉnh/thành phố" />
+                              </SelectTrigger>
                             </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                            <SelectContent>
+                              {filteredProvinces.map((province) => (
+                                <SelectItem
+                                  key={province.id}
+                                  value={province.id}
+                                >
+                                  {province.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="district"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Quận/Huyện</FormLabel>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              handleDistrictChange(value);
+                            }}
+                            value={field.value}
+                            disabled={!selectedProvince}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Chọn quận/huyện" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {selectedProvince?.districts.map((district) => (
+                                <SelectItem
+                                  key={district.id}
+                                  value={district.id}
+                                >
+                                  {district.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="ward"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phường/Xã</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            disabled={!selectedDistrict}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Chọn phường/xã" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {selectedDistrict?.wards.map((ward) => (
+                                <SelectItem key={ward.id} value={ward.id}>
+                                  {ward.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     <FormField
                       control={form.control}

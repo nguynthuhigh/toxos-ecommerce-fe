@@ -14,7 +14,7 @@ interface CartItemProps {
 }
 
 export function CartItemCard({ item, shopId }: CartItemProps) {
-  const { mutate: updateVariant, isPending } = useUpdateVariant();
+  const { mutate: updateVariant } = useUpdateVariant();
   const [selectedName, setSelectedName] = useState(item.variant?.name || "");
   const [selectedValue, setSelectedValue] = useState(item.variant?.value || "");
 
@@ -22,7 +22,6 @@ export function CartItemCard({ item, shopId }: CartItemProps) {
     if (!name) return;
     setSelectedName(name);
 
-    // Find matching variant with new name and current value
     const newVariant = item.variants?.find(
       (v) => v.name === name && v.value === selectedValue
     );
@@ -44,7 +43,6 @@ export function CartItemCard({ item, shopId }: CartItemProps) {
     if (!value) return;
     setSelectedValue(value);
 
-    // Find matching variant with current name and new value
     const newVariant = item.variants?.find(
       (v) => v.name === selectedName && v.value === value
     );
@@ -62,7 +60,6 @@ export function CartItemCard({ item, shopId }: CartItemProps) {
     }
   };
 
-  // Get unique names and values for variants
   const uniqueNames = Array.from(
     new Set(item.variants?.map((v) => v.name) || [])
   );

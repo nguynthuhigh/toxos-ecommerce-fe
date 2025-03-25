@@ -23,11 +23,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [animationStartPosition, setAnimationStartPosition] = useState({
-    x: 0,
-    y: 0,
-  });
+
   const [previousVariant, setPreviousVariant] = useState<string | null>(null);
 
   const onChangeQuantity = (value: number) => {
@@ -98,40 +94,31 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
   const currentPrice = currentVariant?.price || product.price;
   const currentStock = currentVariant?.stock || product.stock || 0;
+  const totalVariantStock =
+    product.variants?.reduce(
+      (total, variant) => total + (variant.stock || 0),
+      0
+    ) || 0;
 
-  const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleAddToCart = async () => {
     if (hasVariants && !currentVariant) {
-      toast.error("Please select color and size");
+      toast.error("Vui lòng chọn sản phẩm");
       return;
     }
 
     const cartData = {
       productId: product._id,
       quantity: quantity,
-      shopId: product.shop._id,
+      shopId: product.shop,
       ...(currentVariant && { variantId: currentVariant._id }),
     };
 
-    addToCart(cartData, {
-      onSuccess: () => {
-        toast.success("Added to cart successfully");
-        const button = e.currentTarget;
-        const rect = button.getBoundingClientRect();
-
-        setAnimationStartPosition({
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2,
-        });
-
-        setIsAnimating(true);
-        setTimeout(() => setIsAnimating(false), 1000);
-      },
-    });
+    addToCart(cartData);
   };
 
   const handleBuyNow = () => {
     if (hasVariants && !currentVariant) {
-      alert("Please select color and size");
+      toast.error("Vui lòng chọn sản phẩm");
       return;
     }
 
@@ -165,18 +152,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
   return (
     <div className="space-y-6">
-      {isAnimating && (
-        <div
-          className="fixed pointer-events-none z-50"
-          style={{
-            left: animationStartPosition.x - 8,
-            top: animationStartPosition.y - 8,
-          }}
-        >
-          <div className="h-4 w-4 bg-blue-500 rounded-full animate-fly-to-cart" />
-        </div>
-      )}
-
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold text-gray-900 leading-relaxed">
           {product.title}
@@ -189,7 +164,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                 <Star
                   key={star}
                   className={`h-4 w-4 ${
-                    // star <= product.rating
                     star <= 0
                       ? "fill-blue-500 text-blue-500"
                       : "fill-gray-200 text-gray-200"
@@ -199,7 +173,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             </div>
           </div>
           <div className="text-gray-500">
-            {/* {/* <span>{product.ratingCount} Đánh Giá</span> */}
             <span>{0} Đánh Giá</span>
           </div>
           <div className="text-gray-500">
@@ -241,57 +214,58 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             title={product.optionName}
           />
           <div className="text-sm text-gray-500">
-            {currentStock > 0 ? (
-              <span>Còn {currentStock} sản phẩm</span>
-            ) : (
-              <span className="text-red-500">Hết hàng</span>
-            )}
+            <>
+              {selectedName && selectedValue && (
+                <span>Còn {currentStock} sản phẩm</span>
+              )}
+              {!selectedName && !selectedValue && (
+                <span className="ml-2">Tổng {totalVariantStock} sản phẩm</span>
+              )}
+            </>
           </div>
         </div>
       ) : (
         <div className="text-sm text-gray-500">
-          <span>Còn {product.stock || 0} sản phẩm</span>
+          {currentStock > 0 ? (
+            <>
+              <span>Còn {currentStock} sản phẩm</span>
+              {product.variants && (
+                <span className="ml-2">
+                  (Tổng {totalVariantStock} sản phẩm)
+                </span>
+              )}
+            </>
+          ) : (
+            <span className="text-red-500">Hết hàng</span>
+          )}
         </div>
       )}
 
-      <div className="flex items-center">
-        <span className="w-28 text-gray-500">Số Lượng</span>
-        <div className="flex-1">
-          <QuantitySelector
-            max={currentStock}
-            initialQuantity={quantity}
-            onQuantityChange={onChangeQuantity}
-          />
-        </div>
-      </div>
-
-      <div className="flex gap-4 pt-4">
+      <div className="flex items-center gap-4">
+        <QuantitySelector
+          initialQuantity={quantity}
+          onQuantityChange={onChangeQuantity}
+          max={currentStock}
+        />
         <Button
-          variant="outline"
-          size="lg"
-          className="flex-1 text-blue-500 border-blue-500 hover:bg-blue-50 hover:text-blue-500"
           onClick={handleAddToCart}
           disabled={
             isAddingToCart ||
-            (hasVariants
-              ? !currentVariant || currentStock <= 0
-              : (product.stock || 0) <= 0)
+            currentStock === 0 ||
+            (hasVariants && !currentVariant)
           }
+          className="flex-1 h-12 gap-2"
         >
-          <ShoppingCart className="w-5 h-5 mr-2" />
-          {isAddingToCart ? "Adding..." : "Thêm Vào Giỏ Hàng"}
+          <ShoppingCart className="h-5 w-5" />
+          Thêm vào giỏ hàng
         </Button>
         <Button
-          size="lg"
-          className="flex-1"
           onClick={handleBuyNow}
-          disabled={
-            hasVariants
-              ? !currentVariant || currentStock <= 0
-              : (product.stock || 0) <= 0
-          }
+          disabled={currentStock === 0 || (hasVariants && !currentVariant)}
+          variant="default"
+          className="flex-1 h-12"
         >
-          Mua Ngay
+          Mua ngay
         </Button>
       </div>
 

@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   useCart,
-  useUpdateQuantity,
   useRemoveItem,
   CartItem,
+  useAddToCart,
 } from "@/lib/services/cart";
 import { getAuthToken } from "@/lib/auth";
 
@@ -31,7 +31,7 @@ interface SelectedProduct {
 export default function CartPage() {
   const router = useRouter();
   const { data: cartShops, isLoading } = useCart();
-  const { mutate: updateQuantity, isPending: isUpdating } = useUpdateQuantity();
+  const { mutate: updateQuantity, isPending: isUpdating } = useAddToCart();
   const { mutate: removeItem, isPending: isRemoving } = useRemoveItem();
 
   const setCartItems = useCartStore((state) => state.setCartItems);
@@ -68,7 +68,7 @@ export default function CartPage() {
     );
   }
 
-  const totalItems = cartShops.reduce(
+  const totalItemsInCart = cartShops.reduce(
     (sum, shop) => sum + shop.products.length,
     0
   );
@@ -79,7 +79,7 @@ export default function CartPage() {
 
   const handleSelectStore = (shopId: string, selected: boolean) => {
     const newSelectedItems = new Set(selectedItems);
-    const shop = cartShops.find((s) => s._id === shopId);
+    const shop = cartShops.find((s) => s.id === shopId);
     if (!shop) return;
 
     shop.products.forEach((product) => {
@@ -97,6 +97,15 @@ export default function CartPage() {
   const handleSelectItem = (productId: string, variantId?: string) => {
     const newSelectedItems = new Set(selectedItems);
     const productKey = getProductKey(productId, variantId);
+
+    if (selectedItems.has(productId)) {
+      Array.from(selectedItems).forEach((key) => {
+        if (key.startsWith(productId)) {
+          newSelectedItems.delete(key);
+        }
+      });
+    }
+
     if (newSelectedItems.has(productKey)) {
       newSelectedItems.delete(productKey);
     } else {
@@ -108,14 +117,18 @@ export default function CartPage() {
   const handleUpdateQuantity = (
     productId: string,
     quantity: number,
-    shopId: string
+    shopId: string,
+    variantId?: string
   ) => {
-    if (quantity < 1) return;
-    updateQuantity({ productId, quantity, shopId });
+    updateQuantity({ productId, quantity, shopId, variantId: variantId || "" });
   };
 
-  const handleRemoveItem = (productId: string) => {
-    removeItem(productId);
+  const handleRemoveItem = (
+    productId: string,
+    shopId: string,
+    variantId?: string
+  ) => {
+    removeItem({ productId, shopId, variantId: variantId || "" });
   };
 
   const isAllSelected =
@@ -148,7 +161,7 @@ export default function CartPage() {
                 className="h-5 w-5"
               />
               <span className="font-medium">
-                Tất cả ({totalItems} sản phẩm)
+                Tất cả ({totalItemsInCart} sản phẩm)
               </span>
             </div>
             <div className="flex-1" />
@@ -162,7 +175,7 @@ export default function CartPage() {
         <div className="space-y-4">
           {cartShops.map((shop) => (
             <div
-              key={shop._id}
+              key={shop.id}
               className="rounded-lg border bg-white p-4 space-y-4"
             >
               <div className="flex items-center space-x-4">
@@ -173,7 +186,7 @@ export default function CartPage() {
                     )
                   )}
                   onCheckedChange={(checked) =>
-                    handleSelectStore(shop._id, !!checked)
+                    handleSelectStore(shop.id, !!checked)
                   }
                   className="h-5 w-5"
                 />
@@ -200,8 +213,11 @@ export default function CartPage() {
               <div className="space-y-4">
                 {shop.products.map((product) => (
                   <div
-                    key={getProductKey(product._id, product.variantId)}
-                    className="flex items-center space-x-4 py-4 border-t"
+                    key={`${shop.id}-${product._id}-${product.variantId || ""}`}
+                    className="flex items-center space-x-4 py-4 border-t cursor-pointer hover:bg-gray-50"
+                    onClick={() =>
+                      handleSelectItem(product._id, product.variantId)
+                    }
                   >
                     <Checkbox
                       checked={selectedItems.has(
@@ -211,6 +227,7 @@ export default function CartPage() {
                         handleSelectItem(product._id, product.variantId)
                       }
                       className="h-5 w-5"
+                      onClick={(e) => e.stopPropagation()}
                     />
                     <div className="flex flex-1 items-center space-x-4">
                       <div className="relative h-20 w-20">
@@ -247,7 +264,7 @@ export default function CartPage() {
                                       }
                                     : undefined,
                                 },
-                                shopId: shop._id,
+                                shopId: shop.id,
                               });
                               setVariantDialogOpen(true);
                             }}
@@ -267,19 +284,26 @@ export default function CartPage() {
                           </button>
                         )}
                         <p className="text-sm font-medium text-blue-500">
-                          ₫{product.price.toLocaleString()}
+                          ₫
+                          {(
+                            product.variants?.find(
+                              (v) => v._id === product.variantId
+                            )?.price || product.price
+                          ).toLocaleString()}
                         </p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <button
                           className="h-8 w-8 rounded-md border"
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             handleUpdateQuantity(
                               product._id,
-                              product.quantity - 1,
-                              shop._id
-                            )
-                          }
+                              -1,
+                              shop.id,
+                              product.variantId
+                            );
+                          }}
                           disabled={product.quantity <= 1 || isUpdating}
                         >
                           -
@@ -290,8 +314,9 @@ export default function CartPage() {
                           onChange={(e) =>
                             handleUpdateQuantity(
                               product._id,
-                              Math.max(1, parseInt(e.target.value) || 1),
-                              shop._id
+                              parseInt(e.target.value),
+                              shop.id,
+                              product.variantId
                             )
                           }
                           className="h-8 w-16 rounded-md border px-2 text-center"
@@ -300,23 +325,37 @@ export default function CartPage() {
                         />
                         <button
                           className="h-8 w-8 rounded-md border"
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             handleUpdateQuantity(
                               product._id,
-                              product.quantity + 1,
-                              shop._id
-                            )
-                          }
+                              1,
+                              shop.id,
+                              product.variantId
+                            );
+                          }}
                           disabled={isUpdating}
                         >
                           +
                         </button>
                       </div>
                       <p className="w-24 text-right font-medium text-blue-500">
-                        ₫{(product.price * product.quantity).toLocaleString()}
+                        ₫
+                        {(
+                          (product.variants?.find(
+                            (v) => v._id === product.variantId
+                          )?.price || product.price) * product.quantity
+                        ).toLocaleString()}
                       </p>
                       <button
-                        onClick={() => handleRemoveItem(product._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveItem(
+                            product._id,
+                            shop.id,
+                            product.variantId
+                          );
+                        }}
                         className="text-gray-400 hover:text-gray-500"
                         disabled={isRemoving}
                       >
@@ -335,7 +374,7 @@ export default function CartPage() {
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
           isAllSelected={isAllSelected}
-          totalItems={totalItems}
+          totalItems={totalItemsInCart}
           getProductKey={getProductKey}
         />
       </div>

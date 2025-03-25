@@ -10,8 +10,8 @@ import ShopInfo from "@/components/shop/shop-info";
 import { ProductReviewsSummary } from "@/components/product/product-reviews-summary";
 import { ProductLoading } from "@/components/ui/loading";
 import { getProductBySlug } from "@/lib/services/product";
+import { getShopById, Shop } from "@/lib/services/shop";
 
-// Mock review data - you can replace this with real data from your API
 const mockReviewData = {
   stats: {
     average: 4.5,
@@ -60,12 +60,22 @@ const mockReviewData = {
 export default function ProductPage() {
   const params = useParams();
 
-  const { data: productData, isLoading } = useQuery({
+  const { data: productData, isLoading: isLoadingProduct } = useQuery({
     queryKey: ["product", params.slug],
     queryFn: () => getProductBySlug(params.slug as string),
   });
 
-  if (isLoading) {
+  const { data: shopData, isLoading: isLoadingShop } = useQuery<Shop | null>({
+    queryKey: ["shop", productData?.data?.shop],
+    queryFn: async () => {
+      if (!productData?.data?.shop) return null;
+      const data = await getShopById(productData.data.shop);
+      return data;
+    },
+    enabled: !!productData?.data?.shop,
+  });
+
+  if (isLoadingProduct || isLoadingShop) {
     return (
       <Container className="py-10">
         <ProductLoading />
@@ -97,8 +107,7 @@ export default function ProductPage() {
       </div>
 
       <Separator className="my-10" />
-
-      <ShopInfo shop={product.shop} />
+      {shopData && <ShopInfo shop={shopData} />}
 
       <Separator className="my-10" />
 

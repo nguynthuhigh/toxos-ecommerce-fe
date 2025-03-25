@@ -9,6 +9,12 @@ const nextConfig = {
       "curxor-tracking.netlify.app",
       "res.cloudinary.com",
     ],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "example.com",
+      },
+    ],
   },
 };
 

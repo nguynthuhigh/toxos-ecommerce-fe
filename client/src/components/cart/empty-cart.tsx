@@ -17,12 +17,14 @@ export function EmptyCart() {
           className="object-contain"
         />
       </div>
-      <h2 className="text-xl font-semibold text-gray-900">NO ITEMS IN CART</h2>
+      <h2 className="text-xl font-semibold text-gray-900">
+        Giỏ hàng của bạn đang trống
+      </h2>
       <p className="text-gray-500 text-center max-w-[400px]">
-        Looks like you haven&apos;t added anything to your cart yet.
+        Hãy thêm sản phẩm vào giỏ hàng để mua sắm.
       </p>
       <Button onClick={() => router.push("/")} className="mt-2">
-        Start Shopping
+        Tiếp tục mua sắm
       </Button>
     </div>
   );

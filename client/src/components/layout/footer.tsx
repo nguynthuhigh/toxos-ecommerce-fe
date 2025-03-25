@@ -128,21 +128,23 @@ export function Footer() {
               <div className="flex items-start space-x-4">
                 <div className="w-24">
                   <Image
-                    src={"https://curxor-tracking.netlify.app/"}
+                    src="/qrcode.png"
                     alt="QR Code"
                     width={96}
                     height={96}
                     className="rounded border"
+                    priority
                   />
                 </div>
                 <div className="flex flex-col space-y-2">
-                  <Link key={"curxor-tracking"} href={"app.href"}>
+                  <Link href="https://curxor-tracking.netlify.app/">
                     <Image
-                      src={`https://curxor-tracking.netlify.app/`}
-                      alt={"curxor-tracking"}
+                      src="/app-store.png"
+                      alt="Download App"
                       width={120}
                       height={40}
                       className="h-10 w-auto"
+                      priority
                     />
                   </Link>
                 </div>

@@ -9,7 +9,6 @@ export function useAuth() {
   const { data: user, isLoading } = useQuery({
     queryKey: ["user"],
     queryFn: auth.getCurrentUser,
-    retry: false,
     enabled: auth.isAuthenticated(),
   });
 

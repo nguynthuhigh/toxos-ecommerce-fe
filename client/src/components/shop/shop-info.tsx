@@ -4,20 +4,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { MessageCircle, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-interface Shop {
-  _id: string;
-  name: string;
-  logo: string;
-  description: string;
-  phoneNumber: string;
-  address: string;
-  detailedAddress: string;
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
-  slug: string;
-}
+import { Shop } from "@/lib/services/shop";
 
 interface ShopInfoProps {
   shop: Shop;

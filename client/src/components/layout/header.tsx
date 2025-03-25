@@ -19,7 +19,7 @@ export default function Header() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const totalItems = useCartStore((state) => state.totalItems);
   return (
-    <Container className="fixed top-0 left-0 right-0 z-50 ">
+    <Container className="fixed top-0 left-0 right-0 z-50 w-full ">
       <header className="sticky top-0 z-50 w-full border-b bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
@@ -60,7 +60,7 @@ export default function Header() {
                       className="flex items-center space-x-2"
                     >
                       <User className="h-5 w-5" />
-                      <span>{user?.email}</span>
+                      <span>{user?.email || ""}</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -94,7 +94,7 @@ export default function Header() {
               >
                 <ShoppingCart className="h-6 w-6" />
                 <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
-                  {totalItems}
+                  {totalItems || 0}
                 </span>
               </Link>
             </div>

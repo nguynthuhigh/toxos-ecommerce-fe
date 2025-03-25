@@ -37,7 +37,7 @@ const menuItems = [
   },
   {
     title: "Xu của tôi",
-    href: "/profile/points",
+    href: "/profile/cashback",
     icon: Gift,
   },
   {

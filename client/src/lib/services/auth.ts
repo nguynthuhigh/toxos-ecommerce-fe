@@ -25,6 +25,7 @@ interface User {
   name?: string;
   avatar?: string;
   role?: string;
+  cashbackBalance: number;
 }
 
 interface AuthResponse {
@@ -44,7 +45,7 @@ const API_ENDPOINTS = {
   REFRESH: "/auth/refresh",
 } as const;
 
-const TOKEN_EXPIRY = 7; // days
+const TOKEN_EXPIRY = 7;
 
 export async function register(data: RegisterData): Promise<AuthResponse> {
   const { data: response } = await axiosInstance.post<AuthResponse>(

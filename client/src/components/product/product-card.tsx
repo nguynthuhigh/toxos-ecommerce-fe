@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { Product } from "@/lib/services/product";
 import { formatPrice } from "@/lib/utils";
 
@@ -58,11 +57,6 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           </div>
         </div>
-        {product.stock === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <span className="text-lg font-bold text-white">Hết hàng</span>
-          </div>
-        )}
       </Link>
     </Card>
   );

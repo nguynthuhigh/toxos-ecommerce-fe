@@ -18,7 +18,7 @@ export function VariantSizeSelect({
 }: VariantSizeSelectProps) {
   const handleSelect = (value: string) => {
     if (selectedValue === value) {
-      onSelect(null); // Deselect if already selected
+      onSelect(null);
     } else {
       onSelect(value);
     }

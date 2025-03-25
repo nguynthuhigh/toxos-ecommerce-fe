@@ -19,15 +19,9 @@ export const useCartStore = create<CartState>()(
         get().updateTotalItems();
       },
       updateTotalItems: () => {
-        const total = get().cartItems.reduce(
-          (sum, shop) =>
-            sum +
-            shop.products.reduce(
-              (shopSum, product) => shopSum + product.quantity,
-              0
-            ),
-          0
-        );
+        const total = get().cartItems.reduce((acc, shop) => {
+          return acc + shop.products.reduce((sum) => sum + 1, 0);
+        }, 0);
         set({ totalItems: total });
       },
     }),

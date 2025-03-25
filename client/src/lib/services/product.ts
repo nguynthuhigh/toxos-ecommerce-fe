@@ -1,4 +1,3 @@
-import { Shop } from "@/interface/product";
 import { axiosInstance } from "../axios";
 
 export interface Variant {
@@ -24,7 +23,7 @@ export interface Product {
   soldCount: number;
   brand: string;
   origin: string;
-  shop: Shop;
+  shop: string;
   category: string;
   subcategory: string;
   variantName: string;
@@ -61,10 +60,9 @@ export const getProducts = async ({
   return data;
 };
 
-export const getProductBySlug = async (slug: string, variant?: string) => {
-  const url = variant
-    ? `/api/product/product/details/${slug}?variant=${variant}`
-    : `/api/product/product/details/${slug}`;
-  const response = await axiosInstance.get(url);
+export const getProductBySlug = async (slug: string) => {
+  const response = await axiosInstance.get(
+    `/api/product/product/details/${slug}`
+  );
   return response.data;
 };
