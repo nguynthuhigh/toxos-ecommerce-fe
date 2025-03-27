@@ -6,10 +6,9 @@ import {
   Button,
   Table,
   Typography,
-  Upload,
   InputNumber,
 } from "antd";
-import { PlusOutlined, CloseOutlined, UploadOutlined } from "@ant-design/icons";
+import { PlusOutlined, CloseOutlined } from "@ant-design/icons";
 import type { UploadFile } from "antd/es/upload/interface";
 import type { RcFile } from "antd/es/upload";
 import type { VariantOption } from "../../schemas/product";
@@ -32,9 +31,9 @@ interface Props {
 type VariantField = keyof Omit<VariantOption, "size" | "color">;
 
 const VariantManager: React.FC<Props> = ({
-  variantImages,
-  onVariantImagesChange,
-  beforeUpload,
+  // variantImages,
+  // onVariantImagesChange,
+  // beforeUpload,
   onChange,
 }) => {
   const [hasVariants, setHasVariants] = useState(false);
@@ -426,7 +425,7 @@ const VariantManager: React.FC<Props> = ({
                                 {index + 1}/20
                               </Text>
                             </div>
-                            {variantImages && onVariantImagesChange && (
+                            {/* {variantImages && onVariantImagesChange && (
                               <Upload
                                 accept="image/*"
                                 beforeUpload={beforeUpload}
@@ -437,7 +436,7 @@ const VariantManager: React.FC<Props> = ({
                               >
                                 <Button icon={<UploadOutlined />} />
                               </Upload>
-                            )}
+                            )} */}
                             <Button
                               type="text"
                               icon={<CloseOutlined />}

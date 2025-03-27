@@ -17,14 +17,12 @@ export const VariantOptionSchema = z.object({
 });
 
 export const CreateProductSchema = z.object({
-  name: z.string().min(1, "Product name is required"),
+  title: z.string().min(1, "Product name is required"),
   description: z.string().min(1, "Product description is required"),
   price: z.number().min(0, "Price must be greater than or equal to 0"),
   stock: z.number().int().min(0, "Stock must be greater than or equal to 0"),
   categoryId: z.string().min(1, "Category is required"),
   subcategoryId: z.string().min(1, "Subcategory is required"),
-  shopId: z.string(),
-  hasVariant: z.boolean(),
   variants: z.array(VariantOptionSchema).optional(),
 });
 

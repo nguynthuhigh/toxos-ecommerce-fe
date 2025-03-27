@@ -1,13 +1,8 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
+import Sidebar from "./sidebar";
 
-interface MainLayoutProps {
-  title: string;
-  description?: string;
-}
-
-const MainLayout: React.FC<MainLayoutProps> = ({ title, description }) => {
+const MainLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -19,15 +14,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ title, description }) => {
         }`}
       >
         <div className="p-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
-              {description && (
-                <p className="text-gray-600 mt-2">{description}</p>
-              )}
-            </div>
-            <Outlet />
-          </div>
+          <Outlet />
         </div>
       </div>
     </div>

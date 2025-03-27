@@ -1,42 +1,55 @@
-import axios from 'axios';
+import axiosInstance from "../lib/axios";
 
-export interface LoginCredentials {
+interface LoginCredentials {
   email: string;
   password: string;
+  type: "email";
 }
 
-export interface LoginResponse {
-  token: string;
+interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
   user: {
     id: string;
     email: string;
+    name: string;
   };
 }
 
 export interface RegisterShopData {
   name: string;
+  description: string;
+  phoneNumber: string;
+  address: string;
+  detailedAddress: string;
+  logo: string | File;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  slug: string;
   logo: string;
   description: string;
   phoneNumber: string;
   address: string;
   detailedAddress: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-const API_URL = 'http://localhost';
-
-export const authApi = {
+export const authService = {
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
-    const response = await axios.post(`${API_URL}/auth/login`, credentials);
+    const response = await axiosInstance.post("/auth/login", credentials);
     return response.data;
   },
-  
-  registerShop: async (shopData: RegisterShopData): Promise<any> => {
-    const token = localStorage.getItem('token');
-    const response = await axios.post(`${API_URL}/shop/register`, shopData, {
+
+  registerShop: async (formData: FormData) => {
+    const response = await axiosInstance.post("/auth/shop/register", formData, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        "Content-Type": "multipart/form-data",
+      },
     });
     return response.data;
-  }
+  },
 };

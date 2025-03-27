@@ -12,11 +12,13 @@ const { Option } = Select;
 interface CategorySelectorProps {
   onCategoryChange: (categoryId: string) => void;
   onSubcategoryChange: (subcategoryId: string) => void;
+  validationErrors: Record<string, string>;
 }
 
 const CategorySelector: React.FC<CategorySelectorProps> = ({
   onCategoryChange,
   onSubcategoryChange,
+  validationErrors,
 }) => {
   const form = Form.useFormInstance();
   const [categoryId, setCategoryId] = useState<string>();
@@ -49,6 +51,10 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
     (subcat) => subcat._id === subcategoryId
   );
 
+  const getFieldError = (fieldName: string) => {
+    return validationErrors[fieldName];
+  };
+
   return (
     <>
       <div className="text-sm text-gray-500 mb-4">
@@ -66,12 +72,15 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
           name="categoryId"
           label="Danh Mục"
           rules={[{ required: true, message: "Vui lòng chọn danh mục" }]}
+          validateStatus={getFieldError("categoryId") ? "error" : undefined}
+          help={getFieldError("categoryId")}
         >
           <Select
             showSearch
             placeholder="Chọn danh mục"
             loading={categoriesLoading}
             onChange={handleCategoryChange}
+            className={getFieldError("categoryId") ? "border-red-500" : ""}
             filterOption={(input, option) =>
               (option?.children as unknown as string)
                 .toLowerCase()
@@ -90,6 +99,8 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
           name="subcategoryId"
           label="Danh Mục Con"
           rules={[{ required: true, message: "Vui lòng chọn danh mục con" }]}
+          validateStatus={getFieldError("subcategoryId") ? "error" : undefined}
+          help={getFieldError("subcategoryId")}
         >
           <Select
             showSearch
@@ -97,6 +108,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
             loading={subcategoriesLoading}
             disabled={!categoryId}
             onChange={handleSubcategoryChange}
+            className={getFieldError("subcategoryId") ? "border-red-500" : ""}
             filterOption={(input, option) =>
               (option?.children as unknown as string)
                 .toLowerCase()
@@ -114,27 +126,41 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 
       {subcategoryDetails?.attributes.map((attribute) => {
         const { name, type, options } = attribute;
+        const attributeError = getFieldError(`attributes.${name}`);
 
         switch (type) {
           case "text":
           case "select":
             return (
-              <Form.Item key={name} name={["attributes", name]} label={name}>
+              <Form.Item
+                key={name}
+                name={["attributes", name]}
+                label={name}
+                validateStatus={attributeError ? "error" : undefined}
+                help={attributeError}
+              >
                 <Input
                   placeholder={
                     options
                       ? `Nhập một trong các giá trị: ${options.join(", ")}`
                       : `Nhập ${name.toLowerCase()}`
                   }
+                  className={attributeError ? "border-red-500" : ""}
                 />
               </Form.Item>
             );
 
           case "number":
             return (
-              <Form.Item key={name} name={["attributes", name]} label={name}>
+              <Form.Item
+                key={name}
+                name={["attributes", name]}
+                label={name}
+                validateStatus={attributeError ? "error" : undefined}
+                help={attributeError}
+              >
                 <InputNumber
-                  className="w-full"
+                  className={`w-full ${attributeError ? "border-red-500" : ""}`}
                   min={0}
                   placeholder={`Nhập ${name.toLowerCase()}`}
                 />
@@ -149,6 +175,8 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
                 label={name}
                 valuePropName="checked"
                 initialValue={false}
+                validateStatus={attributeError ? "error" : undefined}
+                help={attributeError}
               >
                 <Switch />
               </Form.Item>

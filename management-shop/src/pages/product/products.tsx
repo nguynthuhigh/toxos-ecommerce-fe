@@ -1,80 +1,22 @@
-import { FC } from "react";
-import { Table, Button, Space, Tag, Image, Card, Typography } from "antd";
+import { FC, useState, useEffect } from "react";
+import {
+  Table,
+  Button,
+  Space,
+  Tag,
+  Image,
+  Card,
+  Typography,
+  message,
+} from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
+import type { TablePaginationConfig } from "antd/es/table";
 import { Product } from "../../types";
-
+import { useQuery } from "@tanstack/react-query";
+import { productService } from "../../services/product";
+import { useNavigate } from "react-router-dom";
 const { Title, Text } = Typography;
-
-const mockProducts: Product[] = [
-  {
-    key: "1",
-    title: "Jeans Baggy Nam/Nữ",
-    status: "active",
-    price: 200000,
-    discount: 0,
-    stock: 50,
-    thumbnail:
-      "https://res.cloudinary.com/ddjggwkd4/image/upload/v1742119433/uiiv9b23bfm1g87snnvs.png",
-    soldCount: 0,
-    brand: "Nike",
-    origin: "VietNam",
-    variantName: "Màu",
-    optionName: "Kích cỡ",
-    attributes: [
-      {
-        name: "Chất liệu",
-        value: "Denim",
-      },
-    ],
-    variants: [
-      {
-        name: "Xanh Nhạt T1",
-        value: "27",
-        price: 200000,
-        stock: 10,
-        sku: "XANHNHATT1-27",
-      },
-    ],
-  },
-  {
-    key: "1",
-    title: "Jeans Baggy Nam/Nữ",
-    status: "active",
-    price: 5000,
-    discount: 0,
-    stock: 50,
-    thumbnail:
-      "https://res.cloudinary.com/ddjggwkd4/image/upload/v1742119433/uiiv9b23bfm1g87snnvs.png",
-    soldCount: 0,
-    brand: "Nike",
-    origin: "VietNam",
-    variantName: "Màu",
-    optionName: "Kích cỡ",
-    attributes: [
-      {
-        name: "Chất liệu",
-        value: "Denim",
-      },
-    ],
-    variants: [
-      {
-        name: "Xanh Nhạt T1",
-        value: "27",
-        price: 5,
-        stock: 10,
-        sku: "XANHNHATT1-27",
-      },
-      {
-        name: "Xanh Nhạt T1",
-        value: "27",
-        price: 200000,
-        stock: 10,
-        sku: "XANHNHATT1-27",
-      },
-    ],
-  },
-];
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("vi-VN", {
@@ -84,6 +26,25 @@ const formatCurrency = (amount: number) => {
 };
 
 const Products: FC = () => {
+  const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["products", currentPage, pageSize],
+    queryFn: () =>
+      productService.getProducts({ page: currentPage, size: pageSize }),
+  });
+  useEffect(() => {
+    if (error) {
+      message.error("Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.");
+    }
+  }, [error]);
+
+  const handleTableChange = (pagination: TablePaginationConfig) => {
+    if (pagination.current) setCurrentPage(pagination.current);
+    if (pagination.pageSize) setPageSize(pagination.pageSize);
+  };
   const columns: ColumnsType<Product> = [
     {
       title: "Sản phẩm",
@@ -95,7 +56,7 @@ const Products: FC = () => {
             src={record.thumbnail}
             alt={title}
             width={100}
-            className="w-2 h-2 object-cover rounded-lg border border-gray-200"
+            className="w-20 h-20 object-cover rounded-lg border border-gray-200"
             preview={false}
           />
           <div>
@@ -210,17 +171,26 @@ const Products: FC = () => {
         <Title level={3} className="!mb-0">
           Danh sách sản phẩm
         </Title>
-        <Button type="primary" icon={<PlusOutlined />}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            navigate("/products/create");
+          }}
+        >
           Thêm sản phẩm
         </Button>
       </div>
       <Table<Product>
         columns={columns}
-        dataSource={mockProducts}
-        rowKey="key"
+        dataSource={data?.products || []}
+        rowKey="_id"
+        loading={isLoading}
+        onChange={handleTableChange}
         pagination={{
-          total: mockProducts.length,
-          pageSize: 10,
+          current: currentPage,
+          pageSize: pageSize,
+          total: data?.total || 0,
           showSizeChanger: true,
           showQuickJumper: true,
           showTotal: (total) => `Tổng số ${total} sản phẩm`,
