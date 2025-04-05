@@ -19,18 +19,17 @@ interface ProductReviewsDialogProps {
       percentage: number;
     }>;
   };
-  reviews: Array<{
-    id: string;
+  reviews: {
+    _id: string;
     rating: number;
     comment: string;
     images?: string[];
     userName: string;
     userAvatar: string;
-    date: string;
+    createdAt: string;
     variation: string;
     likes: number;
-    replies: number;
-  }>;
+  }[];
 }
 
 const ITEMS_PER_PAGE = 5;
@@ -148,10 +147,15 @@ export function ProductReviewsDialog({
             </Button>
           </div>
 
-          {/* Reviews List */}
           <div className="space-y-6 mt-6">
             {paginatedReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} />
+              <ReviewCard
+                key={review._id}
+                review={{
+                  ...review,
+                  createdAt: review.createdAt,
+                }}
+              />
             ))}
           </div>
         </div>

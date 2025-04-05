@@ -11,55 +11,17 @@ import { ProductReviewsSummary } from "@/components/product/product-reviews-summ
 import { ProductLoading } from "@/components/ui/loading";
 import { getProductBySlug } from "@/lib/services/product";
 import { getShopById, Shop } from "@/lib/services/shop";
-
-const mockReviewData = {
-  stats: {
-    average: 4.5,
-    total: 150,
-    distribution: [
-      { stars: 5, count: 100, percentage: 66.7 },
-      { stars: 4, count: 30, percentage: 20 },
-      { stars: 3, count: 15, percentage: 10 },
-      { stars: 2, count: 3, percentage: 2 },
-      { stars: 1, count: 2, percentage: 1.3 },
-    ],
-  },
-  recentReviews: [
-    {
-      id: "1",
-      rating: 5,
-      comment:
-        "Sản phẩm rất tốt, đóng gói cẩn thận, giao hàng nhanh. Mình rất hài lòng với chất lượng. Shop tư vấn nhiệt tình, sẽ ủng hộ shop dài dài.",
-      images: [
-        "/products/review1.jpg",
-        "/products/review2.jpg",
-        "/products/review3.jpg",
-      ],
-      userName: "Nguyễn Văn A",
-      userAvatar: "/avatars/user1.jpg",
-      date: "15/03/2024 15:30",
-      variation: "Đen, Size L",
-      likes: 12,
-      replies: 2,
-    },
-    {
-      id: "2",
-      rating: 4,
-      comment:
-        "Chất lượng sản phẩm tốt, nhưng giao hàng hơi chậm. Sẽ tiếp tục ủng hộ shop.",
-      userName: "Trần Thị B",
-      userAvatar: "/avatars/user2.jpg",
-      date: "14/03/2024",
-      variation: "Trắng, Size M",
-      likes: 5,
-      replies: 0,
-    },
-  ],
-};
+import {
+  getReviewsProduct,
+  getReviewStats,
+  ReviewsProduct,
+  Stats,
+} from "@/lib/services/review";
+import { useState } from "react";
 
 export default function ProductPage() {
   const params = useParams();
-
+  const [currentPage, setcurrentPage] = useState<number>(1);
   const { data: productData, isLoading: isLoadingProduct } = useQuery({
     queryKey: ["product", params.slug],
     queryFn: () => getProductBySlug(params.slug as string),
@@ -75,7 +37,24 @@ export default function ProductPage() {
     enabled: !!productData?.data?.shop,
   });
 
-  if (isLoadingProduct || isLoadingShop) {
+  const { data: statsData, isLoading: isLoadingStats } = useQuery<Stats>({
+    queryKey: ["reviewStats", params.slug],
+    queryFn: async () => {
+      return await getReviewStats(productData.data._id);
+    },
+    enabled: !!productData?.data?._id,
+  });
+
+  const { data: reviewsData, isLoading: isLoadingReviews } =
+    useQuery<ReviewsProduct>({
+      queryKey: ["reviews", params.slug],
+      queryFn: async () => {
+        return getReviewsProduct(productData?.data?._id, currentPage);
+      },
+      enabled: !!productData?.data?._id,
+    });
+
+  if (isLoadingProduct || isLoadingShop || isLoadingStats || isLoadingReviews) {
     return (
       <Container className="py-10">
         <ProductLoading />
@@ -98,9 +77,7 @@ export default function ProductPage() {
   return (
     <Container className="py-10">
       <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
-        <ProductGallery
-          images={[product.thumbnail, ...(product.images || [])]}
-        />
+        <ProductGallery images={[...(product.images || [])]} />
         <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
           <ProductInfo product={product} />
         </div>
@@ -120,9 +97,32 @@ export default function ProductPage() {
 
       <ProductReviewsSummary
         productId={product._id}
-        stats={mockReviewData.stats}
-        recentReviews={mockReviewData.recentReviews}
+        stats={statsData || { average: 0, total: 0, distribution: [] }}
+        recentReviews={
+          reviewsData?.reviews.map((review) => ({
+            ...review,
+            createdAt: new Date(review.createdAt).toISOString(),
+          })) || []
+        }
       />
+      <Separator className="my-10" />
+
+      <div>
+        {product.attributes.map(
+          (attribute: { name: string; value: string }) => (
+            <div key={attribute.name} className="flex justify-between">
+              <span>{attribute.name}:</span>
+              <span>{attribute.value || "Không có thông tin"}</span>
+            </div>
+          )
+        )}
+
+        {product.optionName && (
+          <div>
+            <strong>Option:</strong> {product.optionName}
+          </div>
+        )}
+      </div>
     </Container>
   );
 }

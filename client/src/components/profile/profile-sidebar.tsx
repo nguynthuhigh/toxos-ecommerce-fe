@@ -7,10 +7,10 @@ import {
   User,
   MapPin,
   Package,
-  Ticket,
+  // Ticket,
   Gift,
-  CreditCard,
-  Bell,
+  // CreditCard,
+  // Bell,
   LogOut,
 } from "lucide-react";
 
@@ -30,26 +30,26 @@ const menuItems = [
     href: "/profile/orders",
     icon: Package,
   },
-  {
-    title: "Voucher",
-    href: "/profile/vouchers",
-    icon: Ticket,
-  },
+  // {
+  //   title: "Voucher",
+  //   href: "/profile/vouchers",
+  //   icon: Ticket,
+  // },
   {
     title: "Xu của tôi",
     href: "/profile/cashback",
     icon: Gift,
   },
-  {
-    title: "Thẻ thanh toán",
-    href: "/profile/payment",
-    icon: CreditCard,
-  },
-  {
-    title: "Thông báo",
-    href: "/profile/notifications",
-    icon: Bell,
-  },
+  // {
+  //   title: "Thẻ thanh toán",
+  //   href: "/profile/payment",
+  //   icon: CreditCard,
+  // },
+  // {
+  //   title: "Thông báo",
+  //   href: "/profile/notifications",
+  //   icon: Bell,
+  // },
 ];
 
 export function ProfileSidebar() {

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import Image from "next/image";
-import { useGetOrders } from "@/lib/services/order";
+import { useGetOrders, Order } from "@/lib/services/order";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { formatPrice } from "@/lib/utils";
@@ -17,6 +17,7 @@ import {
   ORDER_STATUS_LABELS,
   SHIPPING_STATUS_LABELS,
 } from "@/lib/constants/order";
+import { ProductReviewDialog } from "@/components/product/product-review-dialog";
 
 const orderStatuses = [
   { label: "Tất cả", value: "ALL" },
@@ -52,6 +53,8 @@ export default function OrdersPage() {
   const [activeStatus, setActiveStatus] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isReviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order>();
 
   useEffect(() => {
     setMounted(true);
@@ -110,6 +113,11 @@ export default function OrdersPage() {
     }
   };
 
+  const handleOpenReviewDialog = (order: Order) => {
+    setSelectedOrder(order);
+    setReviewDialogOpen(true);
+  };
+
   if (!mounted) {
     return null;
   }
@@ -156,7 +164,7 @@ export default function OrdersPage() {
           <div className="text-center py-8">Không có đơn hàng nào</div>
         ) : (
           orders.map((order) => (
-            <Card key={order._id} className="p-6">
+            <Card key={order.id} className="p-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b pb-4">
                   <div className="flex items-center gap-4">
@@ -170,7 +178,7 @@ export default function OrdersPage() {
                     <div>
                       <h3 className="font-medium">{order.shop.name}</h3>
                       <p className="text-sm text-gray-500">
-                        Đơn hàng: {order._id} |{" "}
+                        Đơn hàng: {order.id} |{" "}
                         {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm", {
                           locale: vi,
                         })}
@@ -235,6 +243,16 @@ export default function OrdersPage() {
                     <Button variant="outline" size="sm">
                       Xem chi tiết đơn hàng
                     </Button>
+                    {order.shippingStatus === SHIPPING_STATUS.DELIVERED &&
+                      order.isReview === true && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenReviewDialog(order)}
+                        >
+                          Đánh giá
+                        </Button>
+                      )}
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-gray-500">Tổng số tiền:</p>
@@ -256,6 +274,15 @@ export default function OrdersPage() {
             onPageChange={handlePageChange}
           />
         </div>
+      )}
+      {selectedOrder && (
+        <ProductReviewDialog
+          isOpen={isReviewDialogOpen}
+          onClose={() => setReviewDialogOpen(false)}
+          orderItems={selectedOrder.orderItems}
+          orderId={selectedOrder.id}
+          shopId={selectedOrder.shop.id}
+        />
       )}
     </div>
   );

@@ -93,8 +93,15 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" className="w-full">
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() =>
+                (window.location.href =
+                  "https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?client_id=129920035403-a001bp1s61r0vi9c3n06umbnnqbcf2qj.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fgoogle&response_type=code&scope=email&service=lso&o2v=1&ddm=1&flowName=GeneralOAuthFlow")
+              }
+            >
               <svg
                 className="mr-2 h-4 w-4"
                 aria-hidden="true"
@@ -112,7 +119,7 @@ export default function LoginPage() {
               </svg>
               Google
             </Button>
-            <Button variant="outline" className="w-full">
+            {/* <Button variant="outline" className="w-full">
               <svg
                 className="mr-2 h-4 w-4"
                 aria-hidden="true"
@@ -129,7 +136,7 @@ export default function LoginPage() {
                 ></path>
               </svg>
               Facebook
-            </Button>
+            </Button> */}
           </div>
         </div>
 

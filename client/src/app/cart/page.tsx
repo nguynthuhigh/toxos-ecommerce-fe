@@ -35,6 +35,7 @@ export default function CartPage() {
   const { mutate: removeItem, isPending: isRemoving } = useRemoveItem();
 
   const setCartItems = useCartStore((state) => state.setCartItems);
+  const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [selectedProduct, setSelectedProduct] =
     useState<SelectedProduct | null>(null);
@@ -120,7 +121,60 @@ export default function CartPage() {
     shopId: string,
     variantId?: string
   ) => {
-    updateQuantity({ productId, quantity, shopId, variantId: variantId || "" });
+    const productKey = getProductKey(productId, variantId);
+
+    // Nếu sản phẩm đang cập nhật, không cho phép bấm tiếp
+    if (updatingItems.has(productKey)) return;
+
+    setUpdatingItems((prev) => new Set(prev).add(productKey)); // Đánh dấu đang cập nhật
+
+    const product = cartShops
+      .flatMap((shop) => shop.products)
+      .find((p) => p._id === productId && p.variantId === variantId);
+
+    if (!product) {
+      setUpdatingItems((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(productKey);
+        return newSet;
+      });
+      return;
+    }
+
+    const stock =
+      product.variants?.find((v) => v._id === variantId)?.stock ??
+      product.stock;
+    if (
+      product.quantity + quantity < 1 ||
+      product.quantity + quantity > stock
+    ) {
+      setUpdatingItems((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(productKey);
+        return newSet;
+      });
+      return;
+    }
+
+    updateQuantity(
+      { productId, quantity, shopId, variantId: variantId || "" },
+      {
+        onSuccess: () => {
+          setUpdatingItems((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(productKey);
+            return newSet;
+          });
+        },
+        onError: () => {
+          setUpdatingItems((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(productKey);
+            return newSet;
+          });
+        },
+      }
+    );
   };
 
   const handleRemoveItem = (
@@ -308,21 +362,23 @@ export default function CartPage() {
                         >
                           -
                         </button>
+
                         <input
                           type="number"
                           value={product.quantity}
                           onChange={(e) =>
                             handleUpdateQuantity(
                               product._id,
-                              parseInt(e.target.value),
+                              parseInt(e.target.value) - product.quantity,
                               shop.id,
                               product.variantId
                             )
                           }
                           className="h-8 w-16 rounded-md border px-2 text-center"
                           min="1"
-                          disabled={isUpdating}
+                          disabled={true}
                         />
+
                         <button
                           className="h-8 w-8 rounded-md border"
                           onClick={(e) => {
@@ -334,7 +390,11 @@ export default function CartPage() {
                               product.variantId
                             );
                           }}
-                          disabled={isUpdating}
+                          disabled={
+                            updatingItems.has(
+                              getProductKey(product._id, product.variantId)
+                            ) || isUpdating
+                          }
                         >
                           +
                         </button>

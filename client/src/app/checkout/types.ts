@@ -22,7 +22,9 @@ export interface OrderItem {
 }
 
 export interface Order {
+  id: string;
   shop: Shop;
+  isReview: boolean;
   orderItems: OrderItem[];
 }
 
@@ -34,4 +36,4 @@ export interface CheckoutData {
   orders: Order[];
 }
 
-export type PaymentMethod = "pointer_wallet" | "stripe";
+export type PaymentMethod = "pointer_wallet" | "stripe" | "cod";

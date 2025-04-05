@@ -39,6 +39,7 @@ export interface CartItem {
   _id: string;
   title: string;
   price: number;
+  stock: number;
   quantity: number;
   thumbnail: string;
   variantId?: string;
@@ -160,6 +161,7 @@ export function useAddToCart() {
                 _id: newItem.productId,
                 quantity: newItem.quantity,
                 variantId: newItem.variantId,
+                stock: 0,
                 title: "",
                 price: 0,
                 thumbnail: "",
@@ -366,7 +368,7 @@ export function useRemoveItem() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
-      toast.success("Item removed successfully");
+      toast.success("Xóa sản phẩm thành công");
     },
   });
 }

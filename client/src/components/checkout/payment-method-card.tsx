@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Wallet, CreditCard } from "lucide-react";
+import { Wallet, CreditCard, AppWindowMac } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PaymentMethod } from "@/app/checkout/types";
 
@@ -68,6 +68,28 @@ export function PaymentMethodCard({
                     <span className="font-medium">Stripe</span>
                     <div className="inline-flex items-center ml-2 px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-600">
                       Hoàn tiền 2%
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+            <div
+              className={cn(
+                "flex items-center justify-between rounded-lg border p-4",
+                paymentMethod === "cod" && "border-blue-500 bg-blue-50"
+              )}
+            >
+              <div className="flex items-center space-x-3">
+                <RadioGroupItem value="cod" id="cod" />
+                <label
+                  htmlFor="cod"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <AppWindowMac className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <span className="font-medium">COD</span>
+                    <div className="inline-flex items-center ml-2 px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-600">
+                     Thanh toán khi nhận hàng
                     </div>
                   </div>
                 </label>

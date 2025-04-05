@@ -14,10 +14,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useCartStore } from "@/lib/store/cart";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
+  const router = useRouter();
   const { user, isAuthenticated, logout } = useAuthStore();
   const totalItems = useCartStore((state) => state.totalItems);
+  const [keyword, setKeyword] = useState<string>();
   return (
     <Container className="fixed top-0 left-0 right-0 z-50 w-full ">
       <header className="sticky top-0 z-50 w-full border-b bg-white">
@@ -36,17 +40,25 @@ export default function Header() {
             <div className="flex flex-1 items-center justify-center px-6">
               <div className="w-full max-w-2xl">
                 <div className="relative">
-                  <Input
-                    type="search"
-                    placeholder="Search for products..."
-                    className="w-full rounded-full border-2 border-blue-500 pl-4 pr-12 focus:border-blue-600"
-                  />
-                  <Button
-                    type="submit"
-                    className="absolute right-0 top-0 h-full rounded-r-full bg-blue-500 px-6 hover:bg-blue-600"
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      router.push(`/search?keyword=${keyword}`);
+                    }}
                   >
-                    <Search className="h-5 w-5 text-white" />
-                  </Button>
+                    <Input
+                      onChange={(e) => setKeyword(e.target.value)}
+                      type="search"
+                      placeholder="Search for products..."
+                      className="w-full rounded-full border-2 border-blue-500 pl-4 pr-12 focus:border-blue-600"
+                    />
+                    <Button
+                      type="submit"
+                      className="absolute right-0 top-0 h-full rounded-r-full bg-blue-500 px-6 hover:bg-blue-600"
+                    >
+                      <Search className="h-5 w-5 text-white" />
+                    </Button>
+                  </form>
                 </div>
               </div>
             </div>
@@ -70,7 +82,7 @@ export default function Header() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Link href="/orders" className="w-full">
+                      <Link href="/profile/orders" className="w-full">
                         Orders
                       </Link>
                     </DropdownMenuItem>
@@ -88,15 +100,15 @@ export default function Header() {
                   <span>Login</span>
                 </Link>
               )}
-              <Link
-                href="/cart"
-                className="relative flex items-center text-sm text-gray-700 hover:text-blue-500"
+              <button
+                onClick={() => router.push("/cart")}
+                className="relative flex items-center  text-sm text-gray-700 hover:text-blue-500"
               >
                 <ShoppingCart className="h-6 w-6" />
                 <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
                   {totalItems || 0}
                 </span>
-              </Link>
+              </button>
             </div>
           </div>
         </div>

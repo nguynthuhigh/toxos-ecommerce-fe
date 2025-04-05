@@ -2,8 +2,20 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../axios";
 import { SHIPPING_STATUS } from "@/lib/constants/order";
 
+export interface OrderItem {
+  id: string;
+  productName: string;
+  productId: string;
+  productThumbnail: string;
+  variation: string;
+  quantity: number;
+  price: number;
+  tags: string;
+  category: string;
+}
 export interface Order {
-  _id: string;
+  id: string;
+  isReview: boolean;
   shop: {
     id: string;
     name: string;
@@ -11,18 +23,9 @@ export interface Order {
     slug: string;
   };
   status: string;
-  shippingStatus: keyof typeof SHIPPING_STATUS;
+  shippingStatus: (typeof SHIPPING_STATUS)[keyof typeof SHIPPING_STATUS];
   createdAt: string;
-  orderItems: {
-    id: string;
-    productName: string;
-    productThumbnail: string;
-    variation: string;
-    quantity: number;
-    price: number;
-    tags: string;
-    category: string;
-  }[];
+  orderItems: OrderItem[];
   totalPrice: number;
 }
 

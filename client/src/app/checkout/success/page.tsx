@@ -35,7 +35,7 @@ export default function CheckoutSuccessPage() {
 
             <div className="mt-8 flex flex-col space-y-3 sm:flex-row sm:space-x-4 sm:space-y-0">
               <Button
-                onClick={() => router.push("/orders")}
+                onClick={() => router.push("/profile/orders")}
                 variant="outline"
                 className="min-w-[200px]"
               >

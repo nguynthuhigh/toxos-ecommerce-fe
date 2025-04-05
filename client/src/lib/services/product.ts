@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../axios";
 
 export interface Variant {
@@ -66,3 +67,37 @@ export const getProductBySlug = async (slug: string) => {
   );
   return response.data;
 };
+
+export interface SearchProductsParams {
+  keyword?: string;
+  sortByPrice?: "asc" | "desc";
+  minPrice?: number;
+  maxPrice?: number;
+  rating?: number;
+  page?: number;
+}
+
+export async function searchProducts(
+  params: SearchProductsParams
+): Promise<ProductsResponse> {
+  const searchParams = new URLSearchParams();
+
+  if (params.keyword) searchParams.set("keyword", params.keyword);
+  if (params.sortByPrice) searchParams.set("sortByPrice", params.sortByPrice);
+  if (params.minPrice) searchParams.set("minPrice", params.minPrice.toString());
+  if (params.maxPrice) searchParams.set("maxPrice", params.maxPrice.toString());
+  if (params.rating) searchParams.set("rating", params.rating.toString());
+  if (params.page) searchParams.set("page", params.page.toString());
+
+  const response = await axiosInstance.get(
+    `/api/product/product/search?${searchParams.toString()}`
+  );
+  return response.data;
+}
+
+export function useSearchProducts(params: SearchProductsParams) {
+  return useQuery({
+    queryKey: ["products", "search", params],
+    queryFn: () => searchProducts(params),
+  });
+}

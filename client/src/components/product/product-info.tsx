@@ -61,7 +61,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         (a, b) => Number(a) - Number(b)
       )
     : [];
-
+  const hasSizeOptions = allValues.some((value) => value !== "");
   const nameAvailability = uniqueNames.map((name) => {
     const hasAvailableVariants = product.variants.some(
       (v) =>
@@ -207,12 +207,14 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             title={product.variantName}
           />
 
-          <VariantSizeSelect
-            values={valueAvailability}
-            selectedValue={selectedValue}
-            onSelect={handleValueSelect}
-            title={product.optionName}
-          />
+          {hasSizeOptions && (
+            <VariantSizeSelect
+              values={valueAvailability}
+              selectedValue={selectedValue}
+              onSelect={handleValueSelect}
+              title={product.optionName}
+            />
+          )}
           <div className="text-sm text-gray-500">
             <>
               {selectedName && selectedValue && (

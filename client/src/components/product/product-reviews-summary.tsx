@@ -5,7 +5,6 @@ import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { ReviewCard } from "@/components/review/review-card";
 import { ProductReviewsDialog } from "./product-reviews-dialog";
 
@@ -14,28 +13,26 @@ interface ProductReviewsSummaryProps {
   stats: {
     average: number;
     total: number;
-    distribution: Array<{
+    distribution: {
       stars: number;
       count: number;
       percentage: number;
-    }>;
+    }[];
   };
-  recentReviews: Array<{
-    id: string;
+  recentReviews: {
+    _id: string;
     rating: number;
     comment: string;
     images?: string[];
     userName: string;
     userAvatar: string;
-    date: string;
     variation: string;
     likes: number;
-    replies: number;
-  }>;
+    createdAt: string;
+  }[];
 }
 
 export function ProductReviewsSummary({
-  productId,
   stats,
   recentReviews,
 }: ProductReviewsSummaryProps) {
@@ -51,7 +48,6 @@ export function ProductReviewsSummary({
       </div>
 
       <Card className="p-6">
-        {/* Rating Summary */}
         <div className="flex gap-8 border-b pb-6">
           <div className="text-center">
             <div className="text-3xl font-bold text-blue-600">
@@ -75,7 +71,6 @@ export function ProductReviewsSummary({
             </div>
           </div>
 
-          {/* Rating Distribution */}
           <div className="flex-1">
             {stats.distribution.map((stat) => (
               <div key={stat.stars} className="flex items-center gap-2 mb-2">
@@ -92,10 +87,9 @@ export function ProductReviewsSummary({
           </div>
         </div>
 
-        {/* Recent Reviews */}
         <div className="space-y-6 mt-6">
           {recentReviews.slice(0, 2).map((review) => (
-            <ReviewCard key={review.id} review={review} />
+            <ReviewCard key={review._id} review={review} />
           ))}
           {recentReviews.length > 2 && (
             <div className="text-center">
@@ -107,12 +101,11 @@ export function ProductReviewsSummary({
         </div>
       </Card>
 
-      {/* Reviews Dialog */}
       <ProductReviewsDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         stats={stats}
-        reviews={recentReviews}
+        reviews={recentReviews || []}
       />
     </div>
   );

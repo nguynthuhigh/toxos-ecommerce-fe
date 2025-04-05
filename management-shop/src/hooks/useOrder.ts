@@ -53,18 +53,7 @@ export interface OrderStatistics {
   totalOrders: number;
   totalRevenue: string;
   pendingOrders: number;
-  completedOrders: number;
-  cancelledOrders: number;
-  recentOrders: Order[];
-  topProducts: {
-    productName: string;
-    quantity: number;
-    revenue: string;
-  }[];
-  monthlyRevenue: {
-    month: string;
-    revenue: string;
-  }[];
+  deliveredOrders: number;
 }
 
 interface OrderResponse {

@@ -5,19 +5,20 @@ import Image from "next/image";
 import { Star, ThumbsUp, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
 
 interface ReviewCardProps {
   review: {
-    id: string;
+    _id: string;
     rating: number;
     comment: string;
     images?: string[];
     userName: string;
     userAvatar: string;
-    date: string;
+    createdAt: string;
     variation: string;
     likes: number;
-    replies: number;
     isLiked?: boolean;
   };
 }
@@ -65,7 +66,10 @@ export function ReviewCard({ review }: ReviewCardProps) {
             ))}
           </div>
           <p className="text-sm text-gray-500 mt-1">
-            {review.date} | Phân loại: {review.variation}
+            {format(new Date(review.createdAt), "dd/MM/yyyy HH:mm", {
+              locale: vi,
+            })}
+            | Phân loại: {review.variation}
           </p>
         </div>
       </div>
@@ -115,9 +119,9 @@ export function ReviewCard({ review }: ReviewCardProps) {
             <ThumbsUp className="h-4 w-4 mr-2" />
             Hữu ích ({likesCount})
           </Button>
-          <Button variant="ghost" size="sm" className="text-gray-500">
+          <Button disabled variant="ghost" size="sm" className="text-gray-500">
             <MessageCircle className="h-4 w-4 mr-2" />
-            Trả lời ({review.replies})
+            Trả lời
           </Button>
         </div>
       </div>
